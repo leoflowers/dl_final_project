@@ -73,9 +73,13 @@ def modelTraining(epochs, distributed=False, world_size=1, rank=0):
 
 
     # saves metrics into csv
-    filename = f"../stats/resnet34-{world_size}-gpus.csv"
+    filename = f"../stats/resnet34-{world_size}gpus.csv"
     stats.collectStatistics(loss_per_epoch, acc_per_epoch, test_loss_per_epoch, filename)
 
+
+    # saves model
+    if rank == 0:
+        torch.save(model.model.state_dict(), f'../model_states/resnet34-{world_size}gpus-{epochs}epochs.pt')
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
