@@ -1,17 +1,17 @@
 import torch
 
 
-def test(model, dataloader, device):
+def test(model, dataloader, criterion, device):
     test_loss, correct = 0.0, 0
     
-    model.model.eval()
+    #model.model.eval()
     with torch.no_grad():
         for inputs, labels in dataloader:
             inputs = inputs.to(device)
             labels = labels.to(device)
             
             predictions = model.model(inputs)
-            loss = model.criterion(predictions, labels)
+            loss = criterion(predictions, labels)
             
             test_loss += loss.item()
             predictions = torch.argmax(predictions, dim=1, keepdim=True).flatten()
@@ -20,4 +20,6 @@ def test(model, dataloader, device):
     test_loss /= len(dataloader)
     correct /= len(dataloader.dataset)
     
-    print(f"Test error:\n\tAccuracy: {(100*correct):>0.1f}%, average loss: {test_loss:>8f}\n")
+    epoch_acc = correct*100
+    #print(f"Test error:\n\tAccuracy: {(100*correct):>0.1f}%, average loss: {test_loss:>8f}\n")
+    return epoch_acc, test_loss
