@@ -32,7 +32,7 @@ def create_datasets(transformations, check_valid):
 def create_dataloaders(dsets, distributed=False, world_size=0, rank=0):
     if distributed:
         print("Using distributed dataloader")
-        sampler = torch.utils.data.DistributedSample(dsets['train'],
+        sampler = torch.utils.data.DistributedSampler(dsets['train'],
                                                      num_replicas=world_size,
                                                      rank=rank,
                                                      shuffle=True,

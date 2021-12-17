@@ -1,6 +1,6 @@
 import torch
 
-def train(model, dataloader, criterion, optimizer, device):
+def train(model, dataloader, criterion, optimizer, device, distributed):
     size = len(dataloader.dataset) 
    
     epoch_loss = 0.0
@@ -11,7 +11,10 @@ def train(model, dataloader, criterion, optimizer, device):
             inputs = inputs.to(device).requires_grad_()
             labels = labels.to(device)
 
-            predictions = model.model(inputs)
+            if distributed:
+                predictions = model(inputs)
+            else:
+                predictions = model.model(inputs)
             loss = criterion(predictions, labels)
 
             loss.backward()

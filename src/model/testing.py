@@ -1,7 +1,7 @@
 import torch
 
 
-def test(model, dataloader, criterion, device):
+def test(model, dataloader, criterion, device, distributed):
     test_loss, correct = 0.0, 0
     
     #model.model.eval()
@@ -10,7 +10,10 @@ def test(model, dataloader, criterion, device):
             inputs = inputs.to(device)
             labels = labels.to(device)
             
-            predictions = model.model(inputs)
+            if distributed:
+                predictions = model(inputs)
+            else:
+                predictions = model.model(inputs)
             loss = criterion(predictions, labels)
             
             test_loss += loss.item()
