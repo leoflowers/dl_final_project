@@ -4,9 +4,8 @@ import model.model as m
 import model.training as training
 import model.testing as testing
 
-import os
+import os, argparse, time
 import torch
-import argparse
 
 import torch.distributed as dist
 import torch.multiprocessing as mp
@@ -50,22 +49,38 @@ def modelTraining(epochs, distributed=False, world_size=1, rank=0):
     loss_per_epoch = []
     acc_per_epoch = []
     test_loss_per_epoch = []
+    time_per_epoch = []
 
     for curr_epoch in range(epochs):
         print(f"---------------------- epoch {curr_epoch + 1}/{epochs} ----------------------")
 
+
         # if distributed, tell sampler the epoch
         if distributed:
             dataloaders['train'].sampler.set_epoch(curr_epoch)
-
-        # trains first
-        model.train()
-        curr_epoch_loss = training.train(model, dataloaders['train'], criterion, optimizer, device, distributed)
-        loss_per_epoch.append(curr_epoch_loss)
-        print(f"\taverage loss: {loss_per_epoch[curr_epoch]}")
         
+        # trains first
+        if distributed:
+            model.train()
+        else:
+            model.model.train()
+
+        t_start = time.time()
+        curr_epoch_loss = training.train(model, dataloaders['train'], criterion, optimizer, device, distributed)
+        t_end = time.time()
+
+        time_elapsed = t_end-t_start
+        loss_per_epoch.append(curr_epoch_loss)
+        time_per_epoch.append(time_elapsed)
+        print(f"\taverage loss: {loss_per_epoch[curr_epoch]}, time elapsed: {time_per_epoch[curr_epoch]}")
+        
+
         # then tests model
-        model.eval()
+        if distributed:
+            model.eval()
+        else:
+            model.model.eval()
+
         curr_epoch_acc, curr_epoch_test_loss = testing.test(model, dataloaders['test'], criterion, device, distributed)
         acc_per_epoch.append(curr_epoch_acc)
         test_loss_per_epoch.append(curr_epoch_test_loss)
@@ -73,8 +88,8 @@ def modelTraining(epochs, distributed=False, world_size=1, rank=0):
 
 
     # saves metrics into csv
-    filename = f"../stats/resnet34-{world_size}gpus.csv"
-    stats.collectStatistics(loss_per_epoch, acc_per_epoch, test_loss_per_epoch, filename)
+    filename = f"../stats/resnet34-gpus{world_size}-rank{rank}.csv"
+    stats.collectStatistics(loss_per_epoch, acc_per_epoch, test_loss_per_epoch, time_per_epoch, filename)
 
 
     # saves model
