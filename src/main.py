@@ -112,17 +112,4 @@ if __name__=="__main__":
         # trains model locally with whatever device is available
     distributed = (args.local_world_size > 1)
     modelTraining(args.epochs, distributed, args.local_world_size, args.local_rank)
-"""
-    else:
-        # trains model on multiple devices
-        size = args.processes 
-        processes = []
-        mp.set_start_method("spawn")
-        for rank in range(size):
-            p = mp.Process(target=init_process, args=(rank, size, run))
-            p.start()
-            processes.append(p)
 
-        for p in processes:
-            p.join()
-"""
