@@ -1,4 +1,4 @@
-# dl_final_project
+# Deep Learning Final Project
 To run, first change into src/ directory and then run the following command:
  
   `python -m torch.distributed.launch --nproc_per_node=(number of gpus wanted) main.py --local_world_size=(same as --nproc_per_node)`
